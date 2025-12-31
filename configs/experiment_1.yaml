@@ -1,0 +1,16 @@
+# Experiment 1 - تجربة مع C أكبر
+experiment_name: iris-classification
+run_name: experiment-lr-c10
+version: v2
+
+data:
+  test_size: 0.2
+  random_state: 42
+
+model:
+  type: logistic_regression
+  params:
+    C: 10.0
+    solver: saga
+    max_iter: 200
+    random_state: 42

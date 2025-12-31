@@ -1,0 +1,16 @@
+# Baseline Configuration - النموذج الأساسي
+experiment_name: iris-classification
+run_name: baseline-logistic-regression
+version: v1
+
+data:
+  test_size: 0.2
+  random_state: 42
+
+model:
+  type: logistic_regression
+  params:
+    C: 1.0
+    solver: lbfgs
+    max_iter: 100
+    random_state: 42

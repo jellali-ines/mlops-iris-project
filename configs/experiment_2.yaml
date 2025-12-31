@@ -1,0 +1,17 @@
+# Experiment 2 - تجربة مع SVM
+experiment_name: iris-classification
+run_name: experiment-svm-rbf
+version: v3
+
+data:
+  test_size: 0.2
+  random_state: 42
+
+model:
+  type: svm
+  params:
+    C: 1.0
+    kernel: rbf
+    gamma: scale
+    probability: true
+    random_state: 42
