@@ -1,0 +1,12 @@
+data:
+  random_state: 42
+  test_size: 0.2
+experiment_name: iris-classification
+model:
+  params:
+    C: 91.85554690332648
+    max_iter: 548
+    solver: saga
+  type: logistic_regression
+run_name: optuna-best
+version: optuna_best
