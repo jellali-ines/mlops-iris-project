@@ -69,6 +69,10 @@ def load_model_artifacts():
     try:
         with open(model_path, 'rb') as f:
             model = pickle.load(f)
+            
+        # Fix for scikit-learn 1.5+ compatibility with older models
+        if hasattr(model, 'coef_') and not hasattr(model, 'multi_class'):
+            model.multi_class = 'auto'
         
         with open(scaler_path, 'rb') as f:
             scaler = pickle.load(f)
