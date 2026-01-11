@@ -13,7 +13,7 @@ seaborn==0.13.1
 # API Framework
 fastapi==0.109.0
 uvicorn[standard]==0.27.0
-pydantic==2.5.3
+pydantic<2.0.0
 
 # Configuration
 pyyaml==6.0.1
