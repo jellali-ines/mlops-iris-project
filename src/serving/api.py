@@ -19,7 +19,7 @@ class IrisFeatures(BaseModel):
     petal_width: float = Field(..., ge=0, le=10, description="عرض البتلة (cm)")
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "sepal_length": 5.1,
                 "sepal_width": 3.5,
