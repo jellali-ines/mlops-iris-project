@@ -74,7 +74,7 @@ bash setup_project.sh
 python src/data/load_data.py
 
 
-# تثبيت DVC
+# Install DVC
 pip install dvc
 # Initialize DVC
 dvc init
@@ -88,13 +88,14 @@ git commit -m "Add iris dataset with DVC tracking"
 dvc push
 ```
 ```
-الخطوة 2.5: التحقق من DVC
-powershell# التحقق من حالة DVC
+Step 2.5: Verify DVC
+```bash
+# Check DVC status
 dvc status
 
-# عرض معلومات DVC
+# Show DVC remote info
 dvc remote list 
-
+```
 ### 2. Training Pipeline (ZenML)
 The project uses ZenML to orchestrate the ML pipeline.
 ```bash
@@ -117,7 +118,7 @@ dvc pull  # Download data
 dvc push  # Upload changes
 ```
 
-### 5. Section 3.9 : Déploiement (Serving) 🚀
+### 5. Section 3.9: Deployment (Serving) 🚀
 This project implements a professional serving layer as per academic requirements:
 
 - **Stable Inference API**: Built with **FastAPI**, providing independent endpoints for:

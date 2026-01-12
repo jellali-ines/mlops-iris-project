@@ -1,5 +1,5 @@
 """
-FastAPI للنموذج - API for Iris Classification
+FastAPI for the model - API for Iris Classification
 """
 import os
 import pickle
@@ -14,11 +14,11 @@ from prometheus_client import Counter, Histogram
 
 # Pydantic models
 class IrisFeatures(BaseModel):
-    """مميزات زهرة Iris"""
-    sepal_length: float = Field(..., ge=0, le=10, description="طول الكأس (cm)")
-    sepal_width: float = Field(..., ge=0, le=10, description="عرض الكأس (cm)")
-    petal_length: float = Field(..., ge=0, le=10, description="طول البتلة (cm)")
-    petal_width: float = Field(..., ge=0, le=10, description="عرض البتلة (cm)")
+    """Iris flower features"""
+    sepal_length: float = Field(..., ge=0, le=10, description="Sepal Length (cm)")
+    sepal_width: float = Field(..., ge=0, le=10, description="Sepal Width (cm)")
+    petal_length: float = Field(..., ge=0, le=10, description="Petal Length (cm)")
+    petal_width: float = Field(..., ge=0, le=10, description="Petal Width (cm)")
     
     class Config:
         json_schema_extra = {
@@ -32,7 +32,7 @@ class IrisFeatures(BaseModel):
 
 
 class PredictionResponse(BaseModel):
-    """استجابة التنبؤ"""
+    """Prediction Response"""
     prediction: int
     class_name: str
     probability: List[float]
@@ -41,7 +41,7 @@ class PredictionResponse(BaseModel):
 
 
 class HealthResponse(BaseModel):
-    """استجابة الصحة"""
+    """Health check response"""
     status: str
     model_loaded: bool
     model_version: str
@@ -50,7 +50,7 @@ class HealthResponse(BaseModel):
 # Initialize FastAPI
 app = FastAPI(
     title="Iris Classification API",
-    description="API لتصنيف زهور Iris باستخدام ML",
+    description="API for Iris flower classification using ML",
     version="1.0.0"
 )
 
@@ -60,7 +60,7 @@ Instrumentator().instrument(app).expose(app, endpoint="/metrics")
 # Global variables
 model = None
 scaler = None
-model_version = os.getenv('MODEL_VERSION', 'optuna_best')  # هذا هو أدق نموذج (ناتج عن تحسين Optuna)
+model_version = os.getenv('MODEL_VERSION', 'optuna_best')  # This is the most accurate model (Optuna output)
 model_path = os.getenv('MODEL_PATH', 'models/model_optuna_best.pkl')
 scaler_path = model_path.replace('model_', 'scaler_')
 
@@ -85,7 +85,7 @@ ERROR_COUNTER = Counter(
 
 
 def load_model_artifacts():
-    """تحميل النموذج والـ scaler"""
+    """Load model and scaler artifacts"""
     global model, scaler
     
     try:
@@ -101,24 +101,24 @@ def load_model_artifacts():
         
         return True
     except Exception as e:
-        print(f"❌ خطأ في تحميل النموذج: {e}")
+        print(f"❌ Error loading model: {e}")
         return False
 
 
 # Load model at startup
 @app.on_event("startup")
 async def startup_event():
-    """تحميل النموذج عند البدء"""
+    """Load model on startup"""
     success = load_model_artifacts()
     if success:
-        print(f"✅ تم تحميل النموذج {model_version} من {model_path}")
+        print(f"✅ Loaded model {model_version} from {model_path}")
     else:
-        print(f"⚠️ تحذير: لم يتم تحميل النموذج من {model_path}")
+        print(f"⚠️ Warning: Model not loaded from {model_path}")
 
 
 @app.get("/", tags=["Root"])
 async def root():
-    """الصفحة الرئيسية"""
+    """Home page"""
     return {
         "message": "Iris Classification API",
         "version": model_version,
@@ -129,7 +129,7 @@ async def root():
 
 @app.get("/health", response_model=HealthResponse, tags=["Health"])
 async def health_check():
-    """فحص صحة الـ API"""
+    """Check API health status"""
     return HealthResponse(
         status="healthy" if model is not None else "unhealthy",
         model_loaded=model is not None,
@@ -139,9 +139,9 @@ async def health_check():
 
 @app.get("/info", tags=["Info"])
 async def model_info():
-    """معلومات النموذج"""
+    """Model information"""
     if model is None:
-        raise HTTPException(status_code=503, detail="النموذج غير محمل")
+        raise HTTPException(status_code=503, detail="Model not loaded")
     
     return {
         "model_version": model_version,
@@ -158,7 +158,7 @@ async def model_info():
 @app.post("/retrain", tags=["Training"])
 async def trigger_retrain(request: Request):
     """
-    طلب إعادة تدريب النموذج
+    Request model retraining
     Triggers a simulated retraining process
     """
     # In a real scenario, this would trigger a GitHub Action or a ZenML pipeline
@@ -175,15 +175,15 @@ async def trigger_retrain(request: Request):
 @app.post("/predict", response_model=PredictionResponse, tags=["Prediction"])
 async def predict(features: IrisFeatures):
     """
-    التنبؤ بنوع زهرة Iris
+    Predict Iris flower species
     
-    - **sepal_length**: طول الكأس بالسنتيمتر
-    - **sepal_width**: عرض الكأس بالسنتيمتر
-    - **petal_length**: طول البتلة بالسنتيمتر
-    - **petal_width**: عرض البتلة بالسنتيمتر
+    - **sepal_length**: Sepal length in cm
+    - **sepal_width**: Sepal width in cm
+    - **petal_length**: Petal length in cm
+    - **petal_width**: Petal width in cm
     """
     if model is None or scaler is None:
-        raise HTTPException(status_code=503, detail="النموذج غير محمل")
+        raise HTTPException(status_code=503, detail="Model not loaded")
     
     # Start timing
     start_time = time.time()
@@ -237,14 +237,14 @@ async def predict(features: IrisFeatures):
             model_version=model_version,
             error_type=type(e).__name__
         ).inc()
-        raise HTTPException(status_code=500, detail=f"خطأ في التنبؤ: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
 
 
 @app.post("/predict/batch", tags=["Prediction"])
 async def predict_batch(features_list: List[IrisFeatures]):
-    """تنبؤات متعددة دفعة واحدة"""
+    """Multiple predictions in batch"""
     if model is None or scaler is None:
-        raise HTTPException(status_code=503, detail="النموذج غير محمل")
+        raise HTTPException(status_code=503, detail="Model not loaded")
     
     predictions = []
     for features in features_list:

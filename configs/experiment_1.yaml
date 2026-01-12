@@ -1,4 +1,4 @@
-# Experiment 1 - تجربة مع C أكبر
+# Experiment 1 - Experiment with larger C
 experiment_name: iris-classification
 run_name: experiment-lr-c10
 version: v2

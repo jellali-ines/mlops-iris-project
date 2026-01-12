@@ -1,5 +1,4 @@
 """
-تحميل بيانات Iris من sklearn وحفظها في CSV
 Load Iris dataset from sklearn and save to CSV
 """
 from pathlib import Path
@@ -10,55 +9,54 @@ from sklearn.datasets import load_iris
 
 def load_and_save_iris(output_path='data/raw/iris.csv'):
     """
-    تحميل بيانات Iris وحفظها
     Load Iris dataset and save to CSV
 
     Args:
-        output_path: مسار حفظ الملف
+        output_path: Path to save the CSV file
     """
     print("=" * 60)
-    print("🌸 تحميل بيانات Iris من sklearn...")
+    print("🌸 Loading Iris dataset from sklearn...")
     print("=" * 60)
     
-    # تحميل البيانات
+    # Load data
     iris = load_iris()
     
-    # إنشاء DataFrame
+    # Create DataFrame
     df = pd.DataFrame(
         data=iris.data,
         columns=iris.feature_names
     )
     
-    # إضافة العمود الهدف
+    # Add target column
     df['target'] = iris.target
     
-    # إضافة أسماء الأنواع للوضوح
+    # Add species names for clarity
     target_names = {0: 'setosa', 1: 'versicolor', 2: 'virginica'}
     df['species'] = df['target'].map(target_names)
     
-    # التأكد من وجود المجلد
+    # Ensure directory exists
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     
-    # حفظ إلى CSV
+    # Save to CSV
     df.to_csv(output_path, index=False)
     
-    print(f"\n✅ تم حفظ البيانات في: {output_path}")
-    print(f"📊 الحجم: {df.shape}")
-    print(f"📝 الأعمدة: {list(df.columns)}")
+    print(f"\n✅ Data saved at: {output_path}")
+    print(f"📊 Shape: {df.shape}")
+    print(f"📝 Columns: {list(df.columns)}")
     
     print("\n" + "=" * 60)
-    print("أول 5 صفوف:")
+    print("First 5 rows:")
     print("=" * 60)
     print(df.head())
     
     print("\n" + "=" * 60)
-    print("توزيع الأنواع:")
+    print("Species distribution:")
     print("=" * 60)
     print(df['species'].value_counts())
     
     print("\n" + "=" * 60)
-    print("إحصائيات البيانات:")
+    print("Data statistics:")
     print("=" * 60)
     print(df.describe())
     
@@ -66,16 +64,16 @@ def load_and_save_iris(output_path='data/raw/iris.csv'):
 
 
 def main():
-    """الدالة الرئيسية"""
+    """Main function"""
     df = load_and_save_iris()
     
     print("\n" + "=" * 60)
-    print("✅ تم إعداد البيانات بنجاح!")
+    print("✅ Data prepared successfully!")
     print("=" * 60)
-    print("\n📋 الخطوات التالية:")
-    print("  1. تتبع البيانات مع DVC: dvc add data/raw/iris.csv")
-    print("  2. تدريب النموذج: python src/models/train.py")
-    print("  3. تشغيل MLflow: mlflow ui")
+    print("\n📋 Next Steps:")
+    print("  1. Track data with DVC: dvc add data/raw/iris.csv")
+    print("  2. Train the model: python src/models/train.py")
+    print("  3. Run MLflow: mlflow ui")
     print("\n" + "=" * 60)
 
 

@@ -1,4 +1,4 @@
-# Baseline Configuration - النموذج الأساسي
+# Baseline Configuration - Base Model
 experiment_name: iris-classification
 run_name: baseline-logistic-regression
 version: v1

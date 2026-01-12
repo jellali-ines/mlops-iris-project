@@ -1,5 +1,4 @@
 """
-تحسين Hyperparameters باستخدام Optuna
 Hyperparameter optimization using Optuna with MLflow
 """
 import argparse
@@ -18,7 +17,7 @@ from sklearn.svm import SVC
 
 
 def prepare_data(csv_path='data/raw/iris.csv', test_size=0.2, random_state=42):
-    """تحضير البيانات"""
+    """Prepare data for training"""
     df = pd.read_csv(csv_path)
     X = df.drop(['target', 'species'], axis=1).values
     y = df['target'].values
@@ -35,7 +34,7 @@ def prepare_data(csv_path='data/raw/iris.csv', test_size=0.2, random_state=42):
 
 
 class Objective:
-    """دالة الهدف لـ Optuna"""
+    """Objective function for Optuna"""
     
     def __init__(self, X_train, y_train, X_test, y_test, model_type='logistic_regression'):
         self.X_train = X_train
@@ -45,9 +44,9 @@ class Objective:
         self.model_type = model_type
     
     def __call__(self, trial):
-        """تقييم trial واحد"""
+        """Evaluate a single trial"""
         
-        # اقتراح Hyperparameters
+        # Suggest hyperparameters
         if self.model_type == 'logistic_regression':
             params = {
                 'C': trial.suggest_float('C', 0.001, 100, log=True),
@@ -70,7 +69,7 @@ class Objective:
             model = SVC(**params, probability=True)
         
         else:
-            raise ValueError(f"نوع نموذج غير معروف: {self.model_type}")
+            raise ValueError(f"Unknown model type: {self.model_type}")
         
         # Cross-validation
         cv_scores = cross_val_score(
@@ -80,14 +79,14 @@ class Objective:
         cv_mean = cv_scores.mean()
         cv_std = cv_scores.std()
         
-        # التدريب على كل البيانات
+        # Train on all data
         model.fit(self.X_train, self.y_train)
         y_pred = model.predict(self.X_test)
         
         test_accuracy = accuracy_score(self.y_test, y_pred)
         test_f1 = f1_score(self.y_test, y_pred, average='macro')
         
-        # تسجيل في MLflow
+        # Log to MLflow
         with mlflow.start_run(run_name=f"optuna_trial_{trial.number}", nested=True):
             mlflow.log_params(params)
             mlflow.log_param('model_type', self.model_type)
@@ -105,7 +104,7 @@ class Objective:
 
 
 def save_best_config(study, model_type, output_path='configs/best_optuna.yaml'):
-    """حفظ أفضل تكوين"""
+    """Save best configuration"""
     best_params = study.best_params
     
     config = {
@@ -128,31 +127,31 @@ def save_best_config(study, model_type, output_path='configs/best_optuna.yaml'):
     with open(output_path, 'w') as f:
         yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
     
-    print(f"\n💾 تم حفظ أفضل تكوين في: {output_path}")
+    print(f"\n💾 Best configuration saved at: {output_path}")
     return output_path
 
 
 def main(args):
     print("=" * 70)
-    print("⚡ تحسين Hyperparameters مع Optuna")
+    print("⚡ Hyperparameter Optimization with Optuna")
     print("=" * 70)
     
-    # إعداد MLflow
+    # Setup MLflow
     mlflow_uri = os.getenv('MLFLOW_TRACKING_URI', 'http://localhost:5000')
     mlflow.set_tracking_uri(mlflow_uri)
     mlflow.set_experiment('iris-optimization')
     
-    # تحضير البيانات
-    print("\n📊 تحضير البيانات...")
+    # Prepare data
+    print("\n📊 Preparing data...")
     X_train, X_test, y_train, y_test, scaler = prepare_data()
     
-    # إنشاء Optuna study
+    # Create Optuna study
     study_name = f"iris_{args.model_type}_study"
     
-    print(f"\n⚙️ بدء تحسين Optuna:")
-    print(f"   - النموذج: {args.model_type}")
-    print(f"   - عدد التجارب: {args.n_trials}")
-    print(f"   - اسم الدراسة: {study_name}")
+    print(f"\n⚙️ Starting Optuna optimization:")
+    print(f"   - Model: {args.model_type}")
+    print(f"   - Number of trials: {args.n_trials}")
+    print(f"   - Study name: {study_name}")
     
     study = optuna.create_study(
         study_name=study_name,
@@ -160,14 +159,14 @@ def main(args):
         load_if_exists=True
     )
     
-    # بدء تحسين مع MLflow
+    # Start optimization with MLflow
     with mlflow.start_run(run_name=f"optuna_study_{args.model_type}"):
         objective = Objective(X_train, y_train, X_test, y_test, args.model_type)
         
-        # التحسين
+        # Optimization
         study.optimize(objective, n_trials=args.n_trials, n_jobs=1)
         
-        # تسجيل النتائج
+        # Log results
         mlflow.log_param('n_trials', args.n_trials)
         mlflow.log_param('model_type', args.model_type)
         mlflow.log_metric('best_cv_accuracy', study.best_value)
@@ -178,38 +177,38 @@ def main(args):
         mlflow.log_metric('n_completed_trials', len(study.trials))
         
         print("\n" + "=" * 70)
-        print("✅ اكتمل التحسين!")
+        print("✅ Optimization completed!")
         print("=" * 70)
-        print(f"\n🏆 أفضل تجربة: Trial #{study.best_trial.number}")
-        print(f"📊 أفضل CV Accuracy: {study.best_value:.4f}")
-        print(f"\n⚙️ أفضل Hyperparameters:")
+        print(f"\n🏆 Best trial: Trial #{study.best_trial.number}")
+        print(f"📊 Best CV Accuracy: {study.best_value:.4f}")
+        print(f"\n⚙️ Best Hyperparameters:")
         for key, value in study.best_params.items():
             print(f"   - {key}: {value}")
         print("=" * 70)
         
-        # حفظ التكوين
+        # Save configuration
         config_path = save_best_config(study, args.model_type)
         mlflow.log_artifact(str(config_path))
         
-        print(f"\n💡 لتدريب النموذج بأفضل تكوين:")
+        print(f"\n💡 To train the model with best configuration:")
         print(f"   python src/models/train.py --config {config_path}")
         print("\n" + "=" * 70)
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='تحسين Hyperparameters مع Optuna')
+    parser = argparse.ArgumentParser(description='Hyperparameter Optimization with Optuna')
     parser.add_argument(
         '--model-type',
         type=str,
         default='logistic_regression',
         choices=['logistic_regression', 'svm'],
-        help='نوع النموذج'
+        help='Model type'
     )
     parser.add_argument(
         '--n-trials',
         type=int,
         default=10,
-        help='عدد تجارب Optuna'
+        help='Number of Optuna trials'
     )
     
     args = parser.parse_args()

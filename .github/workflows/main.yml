@@ -6,8 +6,8 @@ on:
   pull_request:
     branches: [ main ]
   schedule:
-    - cron: '0 2 * * *'  # إعادة تدريب مجدولة (Planifié) يومياً الساعة 2 صباحاً
-  workflow_dispatch:      # إضافة: تسمح لك بتشغيل إعادة التدريب يدوياً (Simple trigger)
+    - cron: '0 2 * * *'  # Scheduled retraining (Planned) daily at 2 AM
+  workflow_dispatch:      # Allows manual trigger of the retraining pipeline
 
 jobs:
   test:
