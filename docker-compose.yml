@@ -9,15 +9,11 @@ services:
       - ./mlruns:/mlflow/mlruns
       - ./mlartifacts:/mlflow/mlartifacts
     command: >
-      mlflow server
-      --host 0.0.0.0
-      --port 5000
-      --backend-store-uri sqlite:///mlflow/mlruns/mlflow.db
-      --default-artifact-root /mlflow/mlartifacts
+      mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri sqlite:///mlflow/mlruns/mlflow.db --default-artifact-root /mlflow/mlartifacts
     networks:
       - mlops-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:5000/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -39,13 +35,13 @@ services:
     networks:
       - mlops-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
     restart: unless-stopped
 
-  # Iris API v2 (Optimized - 100%)
+  # Iris API v2 (Intermediate - 96%)
   api-v2:
     build:
       context: .
@@ -62,7 +58,30 @@ services:
     networks:
       - mlops-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Iris API Best (Optuna Optimized - 100%)
+  api-best:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: iris-api:best
+    container_name: iris-api-best
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/app/models
+    environment:
+      - MODEL_VERSION=optuna_best
+      - MODEL_PATH=models/model_optuna_best.pkl
+    networks:
+      - mlops-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
       interval: 30s
       timeout: 10s
       retries: 3

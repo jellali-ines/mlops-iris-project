@@ -6,7 +6,8 @@ on:
   pull_request:
     branches: [ main ]
   schedule:
-    - cron: '0 2 * * *'  # Routine Continuous Training (CT) at 2 AM
+    - cron: '0 2 * * *'  # إعادة تدريب مجدولة (Planifié) يومياً الساعة 2 صباحاً
+  workflow_dispatch:      # إضافة: تسمح لك بتشغيل إعادة التدريب يدوياً (Simple trigger)
 
 jobs:
   test:
@@ -17,7 +18,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.11' # تحديث للنسخة الأحدث لضمان استقرار المكتبات
           
       - name: Install dependencies
         run: |
@@ -53,7 +54,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.11'
           
       - name: Install dependencies
         run: |

@@ -154,6 +154,7 @@ async def model_info():
     }
 
 
+@app.get("/retrain", tags=["Training"])
 @app.post("/retrain", tags=["Training"])
 async def trigger_retrain(request: Request):
     """

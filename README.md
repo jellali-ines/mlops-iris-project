@@ -124,10 +124,11 @@ This project implements a professional serving layer as per academic requirement
   - `/predict`: Model inference.
   - `/health`: Service monitoring.
 - **Docker Compose Orchestration**: Manages the full stack locally:
-  - `api-v1`: Stable baseline service.
-  - `api-v2` / `optuna_best`: Optimized services.
-  - `mlflow`: Tracking backend.
-- **v1 → v2 + Rollback Simulation**: 
+  - `api-v1`: Baseline service (Port **8001**).
+  - `api-v2`: Intermediate service (Port **8002**).
+  - `api-best`: Optimized service using **Best Optuna** (Port **8000**).
+  - `mlflow`: Tracking backend (Port **5000**).
+- **v1 → v2 → Best + Rollback Simulation**: 
   - Verified via the `demo_deployment_v1_v2_rollback.py` script.
   - **Proof**: Terminal output logs success for upgrade and emergency rollback to v1.
 
