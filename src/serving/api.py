@@ -6,8 +6,10 @@ import pickle
 import time
 from typing import List
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel, Field
+from prometheus_fastapi_instrumentator import Instrumentator
+from prometheus_client import Counter, Histogram
 
 
 # Pydantic models
@@ -52,6 +54,9 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# Enable Prometheus metrics
+Instrumentator().instrument(app).expose(app, endpoint="/metrics")
+
 # Global variables
 model = None
 scaler = None
@@ -60,6 +65,23 @@ model_path = os.getenv('MODEL_PATH', 'models/model_optuna_best.pkl')
 scaler_path = model_path.replace('model_', 'scaler_')
 
 CLASS_NAMES = ['Setosa', 'Versicolor', 'Virginica']
+
+# Custom Prometheus Metrics
+PREDICTION_COUNTER = Counter(
+    "iris_predictions_total", 
+    "Total number of predictions", 
+    ["model_version", "class_name"]
+)
+INFERENCE_LATENCY = Histogram(
+    "iris_inference_latency_seconds", 
+    "Inference latency in seconds",
+    ["model_version"]
+)
+ERROR_COUNTER = Counter(
+    "iris_prediction_errors_total", 
+    "Total number of prediction errors",
+    ["model_version", "error_type"]
+)
 
 
 def load_model_artifacts():
@@ -126,7 +148,26 @@ async def model_info():
         "model_type": type(model).__name__,
         "model_path": model_path,
         "classes": CLASS_NAMES,
-        "n_features": 4
+        "n_features": 4,
+        "monitoring": "/metrics",
+        "retrain": "/retrain"
+    }
+
+
+@app.post("/retrain", tags=["Training"])
+async def trigger_retrain(request: Request):
+    """
+    طلب إعادة تدريب النموذج
+    Triggers a simulated retraining process
+    """
+    # In a real scenario, this would trigger a GitHub Action or a ZenML pipeline
+    # Here we simulate it by returning the command to run
+    print(f"🔄 Retrain request received from {request.client.host}")
+    return {
+        "status": "Accepted",
+        "message": "Retraining pipeline triggered (Simulated)",
+        "command": "python src/models/train.py --config configs/best_optuna.yaml",
+        "timestamp": time.time()
     }
 
 
@@ -172,6 +213,16 @@ async def predict(features: IrisFeatures):
         # Calculate inference time
         inference_time = (time.time() - start_time) * 1000  # ms
         
+        # Custom Metrics Logging
+        PREDICTION_COUNTER.labels(
+            model_version=model_version, 
+            class_name=CLASS_NAMES[prediction]
+        ).inc()
+        
+        INFERENCE_LATENCY.labels(
+            model_version=model_version
+        ).observe(inference_time / 1000)
+        
         return PredictionResponse(
             prediction=prediction,
             class_name=CLASS_NAMES[prediction],
@@ -181,6 +232,10 @@ async def predict(features: IrisFeatures):
         )
     
     except Exception as e:
+        ERROR_COUNTER.labels(
+            model_version=model_version,
+            error_type=type(e).__name__
+        ).inc()
         raise HTTPException(status_code=500, detail=f"خطأ في التنبؤ: {str(e)}")
 
 
