@@ -1,4 +1,4 @@
 [core]
     remote = mystorage
-['remote "mystorage"']
-    url = C:\Users\user\dvc-storage
+[remote "mystorage"]
+    url = s3://iris-data-jelalli-2024

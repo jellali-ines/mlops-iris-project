@@ -2,7 +2,6 @@
 تحميل بيانات Iris من sklearn وحفظها في CSV
 Load Iris dataset from sklearn and save to CSV
 """
-import os
 from pathlib import Path
 
 import pandas as pd
@@ -13,7 +12,7 @@ def load_and_save_iris(output_path='data/raw/iris.csv'):
     """
     تحميل بيانات Iris وحفظها
     Load Iris dataset and save to CSV
-    
+
     Args:
         output_path: مسار حفظ الملف
     """
@@ -82,4 +81,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    

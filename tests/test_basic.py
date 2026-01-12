@@ -23,4 +23,4 @@ def test_dockerfile_exists():
 
 def test_docker_compose_exists():
     """Test that docker-compose.yml exists"""
-    assert Path("docker-compose.yml").exists()ئ
+    assert Path("docker-compose.yml").exists()

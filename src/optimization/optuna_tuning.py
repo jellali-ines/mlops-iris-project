@@ -4,7 +4,6 @@ Hyperparameter optimization using Optuna with MLflow
 """
 import argparse
 import os
-import pickle
 from pathlib import Path
 
 import mlflow
@@ -52,7 +51,7 @@ class Objective:
         if self.model_type == 'logistic_regression':
             params = {
                 'C': trial.suggest_float('C', 0.001, 100, log=True),
-                'solver': trial.suggest_categorical('solver', ['lbfgs', 'saga', 'liblinear']),
+                'solver': trial.suggest_categorical('solver', ['lbfgs', 'saga']),
                 'max_iter': trial.suggest_int('max_iter', 100, 1000),
                 'random_state': 42
             }

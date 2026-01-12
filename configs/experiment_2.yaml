@@ -1,6 +1,5 @@
-# Experiment 2 - تجربة مع SVM
 experiment_name: iris-classification
-run_name: experiment-svm-rbf
+run_name: experiment-svm
 version: v3
 
 data:

@@ -19,7 +19,7 @@ class IrisFeatures(BaseModel):
     petal_width: float = Field(..., ge=0, le=10, description="عرض البتلة (cm)")
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "sepal_length": 5.1,
                 "sepal_width": 3.5,
@@ -55,8 +55,8 @@ app = FastAPI(
 # Global variables
 model = None
 scaler = None
-model_version = os.getenv('MODEL_VERSION', 'v2')  # v2 لأنه الأفضل (100%)
-model_path = os.getenv('MODEL_PATH', 'models/model_v2.pkl')
+model_version = os.getenv('MODEL_VERSION', 'optuna_best')  # هذا هو أدق نموذج (ناتج عن تحسين Optuna)
+model_path = os.getenv('MODEL_PATH', 'models/model_optuna_best.pkl')
 scaler_path = model_path.replace('model_', 'scaler_')
 
 CLASS_NAMES = ['Setosa', 'Versicolor', 'Virginica']

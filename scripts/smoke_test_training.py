@@ -2,6 +2,7 @@
 Smoke test for training pipeline - Continuous Training (CT)
 Runs quick training with subset and minimal epochs
 """
+import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
@@ -65,5 +66,4 @@ def main():
     print('='*60)
 
 if __name__ == '__main__':
-    import numpy as np
     main()
