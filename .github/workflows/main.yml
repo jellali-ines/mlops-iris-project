@@ -1,0 +1,65 @@
+name: MLOps Iris CI/CD
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 2 * * *'  # Routine Continuous Training (CT) at 2 AM
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 pytest scikit-learn pandas numpy
+          
+      - name: Lint with flake8
+        run: |
+          flake8 src/ --max-line-length=120 --exclude=__pycache__ --extend-ignore=E203,W503 || true
+          
+      - name: Run unit tests
+        run: |
+          pytest tests/test_basic.py -v
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Build Docker Image
+        run: |
+          docker build -t iris-api:latest .
+          echo "✅ Docker image built successfully"
+
+  smoke-test-ct:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          
+      - name: Install dependencies
+        run: |
+          pip install scikit-learn pandas numpy
+          
+      - name: Run Continuous Training (CT) Smoke Run
+        run: |
+          python scripts/smoke_test_training.py
+          echo "✅ Continuous Training (CT) logic verified"
